@@ -29,7 +29,7 @@ try:
         for pin, sound_file in pin_sound_map.items():
             if GPIO.input(pin) == GPIO.HIGH:
                 print(f"Pin {pin} HIGH → Playing {sound_file}")
-                os.system(f"aplay {sound_file}")
+                os.system(" aplay {}".format(sound_file))
                 time.sleep(0.5)  # Debounce delay
 
         time.sleep(0.1)  # Polling delay
