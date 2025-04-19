@@ -1,52 +1,41 @@
 import RPi.GPIO as GPIO
 import time
 import os
-# import pygame  # Uncomment if using pygame for audio
 
-# Configuration
-INPUT_PIN = 17  # Change this to your GPIO pin
-WAV_FILE = "/home/pi/sound.wav"  # Update this path
+# Configuration: Map each GPIO pin to a specific .wav file
+pin_sound_map = {
+    21: "boomerang.wav",
+    20: "clap.wav",
+    16: "cowbell.wav",
+    12: "highhat.wav",
+    26: "kickdrum.wav",
+    19: "rimshot.wav",
+    13: "snare.wav",
+    5: "stab.wav",
+    6: "synth.wav"
+}
 
-# List of all GPIO pins (BCM mode) on Raspberry Pi (adjust if needed for your board)
-ALL_GPIO_PINS = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
-                 12, 13, 14, 15, 16, 17, 18, 19, 20,
-                 21, 22, 23, 24, 25, 26, 27]
-
-# Setup
+# Setup GPIO
 GPIO.setmode(GPIO.BCM)  # Use BCM pin numbering
 
-# Set all pins to output and LOW
-for pin in ALL_GPIO_PINS:
-    GPIO.setup(pin, GPIO.OUT)
-    GPIO.output(pin, GPIO.LOW)
+# Set each pin in the map as input
+for pin in pin_sound_map:
+    GPIO.setup(pin, GPIO.IN)
 
-# Then set the INPUT_PIN back to input mode
-GPIO.setup(INPUT_PIN, GPIO.IN)
-
-# Optional: pygame setup (if you prefer pygame)
-# pygame.mixer.init()
-# pygame.mixer.music.load(WAV_FILE)
-
-print("Monitoring GPIO pin", INPUT_PIN)
+print("Monitoring pins:", list(pin_sound_map.keys()))
 
 try:
     while True:
-        input_state = GPIO.input(INPUT_PIN)
-        if input_state == GPIO.HIGH:
-            print("HIGH voltage detected!")
-            # Option 1: Using aplay
-            os.system(f"aplay {WAV_FILE}")
+        for pin, sound_file in pin_sound_map.items():
+            if GPIO.input(pin) == GPIO.HIGH:
+                print(f"Pin {pin} HIGH → Playing {sound_file}")
+                os.system(f"aplay {sound_file}")
+                time.sleep(0.5)  # Debounce delay
 
-            # Option 2: Using pygame
-            # if not pygame.mixer.music.get_busy():
-            #     pygame.mixer.music.play()
-
-        else:
-            print("LOW voltage detected.")
-
-        time.sleep(1)
+        time.sleep(0.1)  # Polling delay
 
 except KeyboardInterrupt:
     print("Exiting...")
+
 finally:
     GPIO.cleanup()
